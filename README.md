@@ -8,7 +8,7 @@ It is also designed to scale well with any display, completely lossless.
 I was wanting to make a Linux smart TV distro, but no matter which one I went to,<br>
 at least for Plasma 6, Plasma Bigscreen wasn't available.<br><br>
 
-And Kodi smart TV projects were already available (such as [LibreELEC](https://github.com/LibreELEC/LibreELEC.tv).<br><br>
+And Kodi smart TV projects were already available (such as [LibreELEC](https://github.com/LibreELEC/LibreELEC.tv)).<br><br>
 
 SteamOS can do something similar, but it's more clunky and made for, you know, gaming.<br><br>
 
