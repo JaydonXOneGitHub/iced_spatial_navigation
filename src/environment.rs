@@ -22,7 +22,7 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Environment<CustomMessage, G
 
 impl<CustomMessage: Clone, GridButton: TGridButton> Default for Environment<CustomMessage, GridButton> {
     fn default() -> Self {
-        return Self::new(|| Grid::new(150.0));
+        return Self::new(|| Grid::new().with_spacing(10.0).with_tile_size(150.0));
     }
 }
 

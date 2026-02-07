@@ -5,23 +5,35 @@ use iced::{Element, Padding, Task, widget::{Column, Row, container, scrollable}}
 use crate::{TGridButton, direction::Direction, message::Message, position::Position};
 use iced::widget::button as button_fn;
 
-pub const SPACING: f32 = 10.0;
-
 pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub locations: Vec<Vec<GridButton>>,
     pub position: Position,
     pub tile_size: f32,
+    pub spacing: f32,
     _marker: PhantomData<CustomMessage>
 }
 
 impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
-    pub fn new(tile_size: f32) -> Self {
+    pub fn new() -> Self {
         return Self {
             locations: Vec::new(),
             position: Position::zero(),
-            tile_size: tile_size,
+            tile_size: 0.0,
+            spacing: 0.0,
             _marker: PhantomData
         };
+    }
+}
+
+impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
+    pub fn with_tile_size(mut self, tile_size: f32) -> Self {
+        self.tile_size = tile_size;
+        return self;
+    }
+
+    pub fn with_spacing(mut self, spacing: f32) -> Self {
+        self.spacing = spacing;
+        return self;
     }
 }
 
@@ -52,21 +64,21 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                 .collect();
 
                 return Row::from_vec(buttons)
-                .spacing(SPACING)
+                .spacing(self.spacing)
                 .into();
             }
         )
         .collect();
 
         let column = Column::from_vec(rows)
-        .spacing(SPACING);
+        .spacing(self.spacing);
 
         return container(
             scrollable(
                 column
             )
         )
-        .padding(Padding::new(SPACING))
+        .padding(Padding::new(self.spacing))
         .into();
     }
 
