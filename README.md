@@ -2,7 +2,12 @@
 Iced Spatial Navigation is an unofficial extension to the Iced UI framework.<br>
 It is designed to bring easy remote or gamepad navigation to any TV/console style app.<br><br>
 
-It is also designed to scale well with any display, completely lossless.
+# Features
+It is also designed to scale well with any display, completely lossless.<br><br>
+
+It should be able to handle any vertical button grid you can throw at it, with scrolling and all.<br><br>
+
+Fair warning, though: it cannot handle typical horizontal scrolling without slight code modification.<br><br>
 
 # Why did I make this?
 I was wanting to make a Linux smart TV distro, but no matter which one I went to,<br>
@@ -103,4 +108,10 @@ fn subscription(_env: &Environment<CustomMessage, GridButton>) -> Subscription<M
 }
 ```
 
-And I do believe that's everything.
+And I do believe that's everything needed done to set it up.
+
+# Notice
+
+If you find problems with the library, fork it.<br><br>
+
+I trust that you'll be able to do well and fix the issues. 😊
