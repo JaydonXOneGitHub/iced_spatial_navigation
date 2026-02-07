@@ -2,6 +2,15 @@
 Iced Spatial Navigation is an unofficial extension to the Iced UI framework.<br>
 It is designed to bring easy remote or gamepad navigation to any TV/console style app.<br>
 
+# Why did I make this?
+I was wanting to make a Linux smart TV distro, but no matter which one I went to,<br>
+at least for Plasma 6, Plasma Bigscreen wasn't available.<br>
+And Kodi smart TV projects were already available.<br>
+SteamOS can do something similar, but it's more clunky and made for, you know, gaming.<br>
+So, I figured, why not try something like this?<br>
+I'd learnt a fair bit in the process anyway, so even if this amounts to nothing on my end,<br>
+it didn't really go to waste.
+
 # Setup
 In order to set up Iced Spatial Navigation in your project, simply type:<br>
 
@@ -19,10 +28,10 @@ In `main`, you can keep it as-is:<br>
 
 ```rust
 fn main() -> Result<(), iced::Error> {
-    return iced::application(initialize, update, view)
+    iced::application(initialize, update, view)
     .subscription(subscription)
     .scale_factor(Environment::get_scale_factor)
-    .run();
+    .run()
 }
 ```
 
@@ -32,7 +41,9 @@ In `main.rs`, or another file, make a custom enum:<br>
 pub enum CustomMessage { /* Fill in fields */
 ```
 
-Similarly, define a `GridButton` struct that implements `TGridButton`:
+Make sure to implement `Clone` for it, too, though.<br>
+
+Similarly, define a `GridButton` struct that implements `TGridButton`:<br>
 
 ```rust
 pub struct GridButton {}
@@ -42,10 +53,48 @@ impl TGridButton for GridButton {
 }
 ```
 
-Then, use this as the `initialize` function:
+Then, use this as the `initialize` function:<br>
 
 ```rust
 fn initialize() -> Environment<CustomMessage, GridButton> { // Make sure there are accessible
     Environment::new(|| Grid::new().with_tile_size(150.0).with_spacing(10.0))
 }
 ```
+
+`update` and `view` should look something like this:<br>
+
+```rust
+fn update(_env: &mut Environment<CustomMessage, GridButton>, msg: Message<CustomMessage>) -> Task<Message<CustomMessage>> {
+    match msg {
+        Message::Event(ev) => {
+            Task::none() // Replace this with your own event function call
+        },
+        Message::ButtonPressed(_pos) => {
+            Task::none() // Replace this with your own function call if needed
+        },
+        Message::ItemSelected(_id) => {
+            Task::none() // Replace this with your own function call if needed
+        },
+        Message::Navigate(dir) => {
+            _env.get_grid_mut().move_on_grid(dir)
+        }
+        _ => Task::none()
+    }
+}
+
+fn view(_env: &Environment) -> Element<'_, Message<CustomMessage>> {
+    row![
+        _env.get_grid().to_element()
+    ].into()
+}
+```
+
+As for `subscription`:<br>
+
+```rust
+fn subscription(_env: &Environment<CustomMessage, GridButton>) -> Subscription<Message<CustomMessage>> {
+    iced::event::listen().map(Message::Event) // Maps to standard Iced events
+}
+```
+
+And I do believe that's everything.
