@@ -14,3 +14,12 @@ pub enum Message<CustomMessage: Clone> {
     Custom(CustomMessage),
     Nil
 }
+
+impl<CustomMessage: Clone> Message<CustomMessage> {
+    pub fn get_custom(self) -> Option<CustomMessage> {
+        return match self {
+            Self::Custom(cm) => Option::Some(cm),
+            _ => Option::None
+        };
+    }
+}
