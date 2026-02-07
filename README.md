@@ -1,13 +1,19 @@
 # About
 Iced Spatial Navigation is an unofficial extension to the Iced UI framework.<br>
-It is designed to bring easy remote or gamepad navigation to any TV/console style app.<br>
+It is designed to bring easy remote or gamepad navigation to any TV/console style app.<br><br>
+
+It is also designed to scale well with any display, completely lossless.
 
 # Why did I make this?
 I was wanting to make a Linux smart TV distro, but no matter which one I went to,<br>
-at least for Plasma 6, Plasma Bigscreen wasn't available.<br>
-And Kodi smart TV projects were already available.<br>
-SteamOS can do something similar, but it's more clunky and made for, you know, gaming.<br>
-So, I figured, why not try something like this?<br>
+at least for Plasma 6, Plasma Bigscreen wasn't available.<br><br>
+
+And Kodi smart TV projects were already available (such as [LibreELEC](https://github.com/LibreELEC/LibreELEC.tv).<br><br>
+
+SteamOS can do something similar, but it's more clunky and made for, you know, gaming.<br><br>
+
+So, I figured, why not try something like this?<br><br>
+
 I'd learnt a fair bit in the process anyway, so even if this amounts to nothing on my end,<br>
 it didn't really go to waste.
 
@@ -56,8 +62,8 @@ impl TGridButton for GridButton {
 Then, use this as the `initialize` function:<br>
 
 ```rust
-fn initialize() -> Environment<CustomMessage, GridButton> { // Make sure there are accessible
-    Environment::new(|| Grid::new().with_tile_size(150.0).with_spacing(10.0))
+fn initialize() -> Environment<CustomMessage, GridButton> { // Make sure these custom types are accessible from here
+    Environment::new(|| Grid::new().with_tile_size(150.0).with_spacing(10.0)) // Do more with this if you want to preemptively change the Grid object
 }
 ```
 
