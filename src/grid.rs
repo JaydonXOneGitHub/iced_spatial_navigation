@@ -120,6 +120,11 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
 
         match dir {
             Direction::Up => {
+                if self.position.x > 0 {
+                    self.position.x -= OFFSET;
+                }
+            },
+            Direction::Left => {
                 if self.position.y > 0 {
                     self.position.y -= OFFSET;
                 }
@@ -132,12 +137,14 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                     row_len - OFFSET
                 );
             },
-            Direction::Left => {
-                if self.position.x > 0 {
-                    self.position.x -= OFFSET;
+            Direction::Down => {
+                let row_len: usize = self.locations[self.position.y].len();
+
+                if self.position.x < row_len - OFFSET {
+                    self.position.x += OFFSET;
                 }
             },
-            Direction::Down => {
+            Direction::Right => {
                 if self.position.y < self.locations.len() - OFFSET {
                     self.position.y += OFFSET;
                 }
@@ -149,13 +156,6 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                     0, 
                     row_len - OFFSET
                 );
-            },
-            Direction::Right => {
-                let row_len: usize = self.locations[self.position.y].len();
-
-                if self.position.x < row_len - OFFSET {
-                    self.position.x += OFFSET;
-                }
             }
         }
 
