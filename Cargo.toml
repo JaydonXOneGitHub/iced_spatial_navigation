@@ -1,5 +1,9 @@
 [package]
 name = "iced_spatial_navigation"
+authors = ["Jaydon Yeany"]
+description = "A spatial navigation framework for Iced"
+readme = "README.md"
+license-file = "LICENSE.txt"
 version = "0.1.0"
 edition = "2024"
 
