@@ -77,12 +77,11 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                         )
                         .width(self.tile_size)
                         .height(self.tile_size)
-                        .style(|t, s| -> Style {
+                        .style(move |t, s| -> Style {
                             return match &self.button_callback {
                                 Option::Some(callback) => callback(
                                     self,
-                                    self.position.x,
-                                    self.position.y,
+                                    r, c,
                                     t, s, btn_data
                                 ),
                                 Option::None => Style::default()
