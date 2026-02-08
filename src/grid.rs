@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use iced::{Element, Padding, Task, Theme, widget::{Column, Row, button::{Status, Style}, container, scrollable}};
+use vector_x::Vector2;
 
 use crate::{TGridButton, direction::Direction, message::Message, position::Position};
 use iced::widget::button as button_fn;
@@ -20,8 +21,9 @@ pub type ButtonCallback<CustomMessage, GridButton> = Box<dyn Fn(
 pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub locations: Vec<Vec<GridButton>>,
     pub position: Position,
-    pub tile_size: f32,
-    pub spacing: f32,
+    pub tile_size: Vector2<f32>,
+    pub spacing: Vector2<f32>,
+    pub padding: f32,
     pub button_callback: Option<ButtonCallback<CustomMessage, GridButton>>,
     _marker: PhantomData<CustomMessage>
 }
@@ -31,9 +33,10 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
         return Self {
             locations: Vec::new(),
             position: Position::zero(),
-            tile_size: 0.0,
-            spacing: 0.0,
+            tile_size: Vector2::new(0.0, 0.0),
+            spacing: Vector2::new(0.0, 0.0),
             button_callback: Option::None,
+            padding: 0.0,
             _marker: PhantomData
         };
     }
@@ -41,14 +44,37 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
 
 impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
     /// Set the tile size
-    pub fn with_tile_size(mut self, tile_size: f32) -> Self {
-        self.tile_size = tile_size;
-        return self;
+    pub fn with_tile_size(self, tile_size: f32) -> Self {
+        return self.with_x_tile_size(tile_size).with_y_tile_size(tile_size);
     }
 
     /// Set the grid spacing
-    pub fn with_spacing(mut self, spacing: f32) -> Self {
-        self.spacing = spacing;
+    pub fn with_spacing(self, spacing: f32) -> Self {
+        return self.with_x_spacing(spacing).with_y_spacing(spacing);
+    }
+
+    pub fn with_padding(mut self, padding: f32) -> Self {
+        self.padding = padding;
+        return self;
+    }
+
+    pub fn with_x_spacing(mut self, x_spacing: f32) -> Self {
+        self.spacing.one = x_spacing;
+        return self;
+    }
+
+    pub fn with_y_spacing(mut self, y_spacing: f32) -> Self {
+        self.spacing.two = y_spacing;
+        return self;
+    }
+
+    pub fn with_x_tile_size(mut self, x_tile_size: f32) -> Self {
+        self.tile_size.one = x_tile_size;
+        return self;
+    }
+
+    pub fn with_y_tile_size(mut self, y_tile_size: f32) -> Self {
+        self.tile_size.two = y_tile_size;
         return self;
     }
 
@@ -75,8 +101,8 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                                 btn_data.inner().map(|_| Message::Nil)
                             )
                         )
-                        .width(self.tile_size)
-                        .height(self.tile_size)
+                        .width(self.tile_size.one)
+                        .height(self.tile_size.two)
                         .style(move |t, s| -> Style {
                             return match &self.button_callback {
                                 Option::Some(callback) => callback(
@@ -89,29 +115,29 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                         })
                         .on_press(Message::ButtonPressed(Position::new(c, r)))
                     )
-                    .center_x(self.tile_size)
-                    .center_y(self.tile_size)
+                    .center_x(self.tile_size.one)
+                    .center_y(self.tile_size.two)
                     .id(btn_data.get_id().clone())
                     .into();
                 })
                 .collect();
 
                 return Row::from_vec(buttons)
-                .spacing(self.spacing)
+                .spacing(self.spacing.one)
                 .into();
             }
         )
         .collect();
 
         let column = Column::from_vec(rows)
-        .spacing(self.spacing);
+        .spacing(self.spacing.two);
 
         return container(
             scrollable(
                 column
             )
         )
-        .padding(Padding::new(self.spacing))
+        .padding(Padding::new(self.padding))
         .into();
     }
 

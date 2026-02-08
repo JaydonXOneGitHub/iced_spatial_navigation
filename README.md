@@ -76,7 +76,7 @@ Or this:<br>
 
 ```rust
 fn initialize() -> (Environment<CustomMessage, GridButton>, Task<Message<CustomMessage>>) { // Make sure these custom types are accessible from here
-    let env = Environment::new(|| Grid::new().with_tile_size(150.0).with_spacing(10.0)); // Do more with this if you want to preemptively change the Grid object
+    let env = Environment::new(|| Grid::new().with_tile_size(150.0).with_spacing(10.0).with_padding(10.0)); // Do more with this if you want to preemptively change the Grid object
     let task = Task::none();
     (env, task)
 }
