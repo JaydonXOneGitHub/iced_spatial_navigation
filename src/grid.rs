@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use iced::{Element, Padding, Task, Theme, widget::{Column, Row, button::{Status, Style}, container, scrollable}};
+use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, button::{Status, Style}, container, scrollable}};
 use vector_x::Vector2;
 
 use crate::{TGridButton, direction::Direction, message::Message, position::Position};
@@ -25,6 +25,7 @@ pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub spacing: Vector2<f32>,
     pub padding: f32,
     pub button_callback: Option<ButtonCallback<CustomMessage, GridButton>>,
+    pub scroll_id: Id,
     _marker: PhantomData<CustomMessage>
 }
 
@@ -37,6 +38,7 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
             spacing: Vector2::new(0.0, 0.0),
             button_callback: Option::None,
             padding: 0.0,
+            scroll_id: Id::unique(),
             _marker: PhantomData
         };
     }
@@ -136,6 +138,7 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
             scrollable(
                 column
             )
+            .id(self.scroll_id.clone())
         )
         .padding(Padding::new(self.padding))
         .into();

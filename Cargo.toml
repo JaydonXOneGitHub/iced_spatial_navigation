@@ -4,9 +4,9 @@ authors = ["Jaydon Yeany"]
 description = "A spatial navigation framework for Iced"
 readme = "README.md"
 license-file = "LICENSE.txt"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2024"
 
 [dependencies]
 iced = "0.14.0"
-vector-x = "0.1.2"
+vector-x = "0.1.3"

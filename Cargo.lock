@@ -1242,7 +1242,7 @@ dependencies = [
 
 [[package]]
 name = "iced_spatial_navigation"
-version = "0.1.5"
+version = "0.1.6"
 dependencies = [
  "iced",
  "vector-x",
@@ -2878,9 +2878,9 @@ dependencies = [
 
 [[package]]
 name = "vector-x"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "590b75902a4c0941c6bd88586945ad2a725a295763f62caf488eba03b826d0ee"
+checksum = "7e35f07fc4a7420f242c176de8208dbd4879c8d7f3e44f974e04f28e02c1439f"
 
 [[package]]
 name = "version_check"
