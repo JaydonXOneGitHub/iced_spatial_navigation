@@ -1242,7 +1242,7 @@ dependencies = [
 
 [[package]]
 name = "iced_spatial_navigation"
-version = "0.1.6"
+version = "0.1.8"
 dependencies = [
  "iced",
  "vector-x",

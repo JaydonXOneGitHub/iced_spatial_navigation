@@ -144,8 +144,31 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
         .into();
     }
 
-    pub fn move_on_grid(&mut self, dir: Direction) -> Task<Message<CustomMessage>> {
+    pub fn move_on_grid(
+        &mut self, 
+        dir: Direction
+    ) -> Task<Message<CustomMessage>> {
+        return self.move_on_grid_with_callback(dir, 
+            |_, _, _, _| Task::none()
+        );
+    }
+
+    /// Callback corresponds to (grid, dir, grid_button, positions) 
+    /// (positions.one is the old and positions.two is new)
+    pub fn move_on_grid_with_callback<F>(
+        &mut self, dir: Direction, callback: F
+    ) -> Task<Message<CustomMessage>>
+    where
+        F: FnOnce(
+            &Grid<CustomMessage, GridButton>, 
+            Direction, 
+            &GridButton,
+            Vector2<Position>
+        ) -> Task<Message<CustomMessage>> 
+    {
         const OFFSET: usize = 1;
+        
+        let old_position: Position = self.position;
 
         match dir {
             Direction::Up => {
@@ -190,6 +213,10 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
 
         println!("New grid position: {}", self.position);
 
-        return Task::none();
+        return callback(
+            &self, dir, 
+            &self.locations[self.position.y][self.position.x],
+            Vector2::new(old_position, self.position)
+        );
     }
 }
