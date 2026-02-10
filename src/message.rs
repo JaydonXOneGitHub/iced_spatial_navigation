@@ -1,17 +1,18 @@
-use iced::{Event, widget::Id};
+use iced::{Event, widget::{Id, scrollable::Viewport}};
 
 use crate::{direction::Direction, position::Position};
 
 #[derive(Clone)]
 pub enum Message<CustomMessage: Clone> {
     ButtonPressed(Position),
+    Custom(CustomMessage),
     Event(Event),
     ItemSelected(Id),
-    BoundsFound(),
     Navigate(Direction),
+    GotViewport(Viewport),
+    BoundsFound(),
     Select,
     Back,
-    Custom(CustomMessage),
     Nil
 }
 

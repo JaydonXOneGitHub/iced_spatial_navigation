@@ -8,7 +8,7 @@ use iced::widget::button as button_fn;
 
 /// Ideal structure for member names is:
 /// (grid, x, y, theme, status, grid_button)
-pub type ButtonCallback<CustomMessage, GridButton> = Box<dyn Fn(
+pub type StyleCallback<CustomMessage, GridButton> = Box<dyn Fn(
     &Grid<CustomMessage, GridButton>,
     usize, 
     usize, 
@@ -17,6 +17,11 @@ pub type ButtonCallback<CustomMessage, GridButton> = Box<dyn Fn(
     &GridButton
 ) -> Style>;
 
+pub type CullingCallback<CustomMessage, GridButton> = Box<dyn Fn(
+    &Grid<CustomMessage, GridButton>,
+    usize
+) -> bool>;
+
 /// The main struct for the [`Environment`]'s navigation
 pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub locations: Vec<Vec<GridButton>>,
@@ -24,7 +29,9 @@ pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub tile_size: Vector2<f32>,
     pub spacing: Vector2<f32>,
     pub padding: f32,
-    pub button_callback: Option<ButtonCallback<CustomMessage, GridButton>>,
+    pub style_callback: Option<StyleCallback<CustomMessage, GridButton>>,
+    pub culling_callback: Option<CullingCallback<CustomMessage, GridButton>>,
+    pub grid_size: Option<Vector2<f32>>,
     pub scroll_id: Id,
     _marker: PhantomData<CustomMessage>
 }
@@ -36,7 +43,9 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
             position: Position::zero(),
             tile_size: Vector2::new(0.0, 0.0),
             spacing: Vector2::new(0.0, 0.0),
-            button_callback: Option::None,
+            style_callback: Option::None,
+            culling_callback: Option::None,
+            grid_size: Option::None,
             padding: 0.0,
             scroll_id: Id::unique(),
             _marker: PhantomData
@@ -81,36 +90,110 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
     }
 
     /// Set the button style callback
-    pub fn with_button_callback(mut self, callback: Option<ButtonCallback<CustomMessage, GridButton>>) -> Self {
-        self.button_callback = callback;
+    pub fn with_style_callback(
+        mut self, 
+        callback: impl Into<Option<StyleCallback<CustomMessage, GridButton>>>
+    ) -> Self {
+        self.style_callback = callback.into();
         return self;
+    }
+
+    pub fn with_culling_callback(
+        mut self, 
+        callback: impl Into<Option<CullingCallback<CustomMessage, GridButton>>>
+    ) -> Self {
+        self.culling_callback = callback.into();
+        return self;
+    }
+
+    pub fn with_grid_size(
+        mut self,
+        grid_size: impl Into<Option<Vector2<f32>>>
+    ) -> Self {
+        self.grid_size = grid_size.into();
+        return self;
+    }
+
+    fn is_okay_to_render_row(&self, row_index: usize) -> bool {
+        return match &self.culling_callback {
+            Option::Some(callback) => callback(self, row_index),
+            Option::None => true
+        };
     }
 }
 
 impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
     /// Convert the data to the button elements
     pub fn to_element(&self) -> Element<'_, Message<CustomMessage>> {
-        let rows: Vec<Element<'_, Message<CustomMessage>>> = self.locations.iter()
-        .enumerate()
-        .map(
-            |(r, row)| {
-                let buttons: Vec<Element<'_, Message<CustomMessage>>> = row.iter()
-                .enumerate()
-                .map(|(c, btn_data)| {
-                    return container(
+        // let rows: Vec<Element<'_, Message<CustomMessage>>> = self.locations.iter()
+        // .enumerate()
+        // .map(
+        //     |(r, row)| {
+        //         let buttons: Vec<Element<'_, Message<CustomMessage>>> = row.iter()
+        //         .enumerate()
+        //         .map(|(c, btn_data)| {
+        //             return container(
+        //                 button_fn(
+        //                     container(
+        //                         btn_data.inner().map(|_| Message::Nil)
+        //                     )
+        //                 )
+        //                 .width(self.tile_size.one)
+        //                 .height(self.tile_size.two)
+        //                 .style(move |t, s| -> Style {
+        //                     return match &self.button_callback {
+        //                         Option::Some(callback) => callback(
+        //                             self,
+        //                             c, r,
+        //                             t, s, btn_data
+        //                         ),
+        //                         Option::None => Style::default()
+        //                     };
+        //                 })
+        //                 .on_press(Message::ButtonPressed(Position::new(c, r)))
+        //             )
+        //             .center_x(self.tile_size.one)
+        //             .center_y(self.tile_size.two)
+        //             .id(btn_data.get_id().clone())
+        //             .into();
+        //         })
+        //         .collect();
+
+        //         return Row::from_vec(buttons)
+        //         .spacing(self.spacing.one)
+        //         .into();
+        //     }
+        // )
+        // .collect();
+
+        let e1 = self.locations.iter().enumerate();
+
+        let mut rows: Vec<Element<'_, Message<CustomMessage>>> = Vec::with_capacity(self.locations.len());
+
+        for (r, row) in e1 {
+            if !self.is_okay_to_render_row(r) {
+                continue;
+            }
+
+            let e2 = row.iter().enumerate();
+
+            let mut buttons: Vec<Element<'_, Message<CustomMessage>>> = Vec::with_capacity(row.len()); 
+
+            for (c, button) in e2 {
+                let elem: Element<'_, Message<CustomMessage>> = container(
                         button_fn(
                             container(
-                                btn_data.inner().map(|_| Message::Nil)
+                                button.inner().map(|_| Message::Nil)
                             )
                         )
                         .width(self.tile_size.one)
                         .height(self.tile_size.two)
                         .style(move |t, s| -> Style {
-                            return match &self.button_callback {
+                            return match &self.style_callback {
                                 Option::Some(callback) => callback(
                                     self,
                                     c, r,
-                                    t, s, btn_data
+                                    t, s, button
                                 ),
                                 Option::None => Style::default()
                             };
@@ -119,17 +202,14 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                     )
                     .center_x(self.tile_size.one)
                     .center_y(self.tile_size.two)
-                    .id(btn_data.get_id().clone())
+                    .id(button.get_id().clone())
                     .into();
-                })
-                .collect();
 
-                return Row::from_vec(buttons)
-                .spacing(self.spacing.one)
-                .into();
+                buttons.push(elem);
             }
-        )
-        .collect();
+
+            rows.push(Row::from_vec(buttons).into());
+        }
 
         let column = Column::from_vec(rows)
         .spacing(self.spacing.two);
@@ -139,6 +219,22 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                 column
             )
             .id(self.scroll_id.clone())
+            .height(
+                match &self.grid_size {
+                    Option::Some(gs) => {
+                        gs.two
+                    },
+                    Option::None => 450.0
+                }
+            )
+            .width(
+                match &self.grid_size {
+                    Option::Some(gs) => {
+                        gs.one
+                    },
+                    Option::None => 800.0
+                }
+            )
         )
         .padding(Padding::new(self.padding))
         .into();
