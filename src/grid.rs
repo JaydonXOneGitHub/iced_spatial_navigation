@@ -92,17 +92,17 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
     /// Set the button style callback
     pub fn with_style_callback(
         mut self, 
-        callback: impl Into<Option<StyleCallback<CustomMessage, GridButton>>>
+        callback: Option<StyleCallback<CustomMessage, GridButton>>
     ) -> Self {
-        self.style_callback = callback.into();
+        self.style_callback = callback;
         return self;
     }
 
     pub fn with_culling_callback(
         mut self, 
-        callback: impl Into<Option<CullingCallback<CustomMessage, GridButton>>>
+        callback: Option<CullingCallback<CustomMessage, GridButton>>
     ) -> Self {
-        self.culling_callback = callback.into();
+        self.culling_callback = callback;
         return self;
     }
 
