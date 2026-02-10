@@ -208,7 +208,11 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                 buttons.push(elem);
             }
 
-            rows.push(Row::from_vec(buttons).into());
+            rows.push(
+                Row::from_vec(buttons)
+                .spacing(self.spacing.one)
+                .into()
+            );
         }
 
         let column = Column::from_vec(rows)
