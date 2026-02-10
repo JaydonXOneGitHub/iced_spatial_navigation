@@ -125,47 +125,10 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
 impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
     /// Convert the data to the button elements
     pub fn to_element(&self) -> Element<'_, Message<CustomMessage>> {
-        // let rows: Vec<Element<'_, Message<CustomMessage>>> = self.locations.iter()
-        // .enumerate()
-        // .map(
-        //     |(r, row)| {
-        //         let buttons: Vec<Element<'_, Message<CustomMessage>>> = row.iter()
-        //         .enumerate()
-        //         .map(|(c, btn_data)| {
-        //             return container(
-        //                 button_fn(
-        //                     container(
-        //                         btn_data.inner().map(|_| Message::Nil)
-        //                     )
-        //                 )
-        //                 .width(self.tile_size.one)
-        //                 .height(self.tile_size.two)
-        //                 .style(move |t, s| -> Style {
-        //                     return match &self.button_callback {
-        //                         Option::Some(callback) => callback(
-        //                             self,
-        //                             c, r,
-        //                             t, s, btn_data
-        //                         ),
-        //                         Option::None => Style::default()
-        //                     };
-        //                 })
-        //                 .on_press(Message::ButtonPressed(Position::new(c, r)))
-        //             )
-        //             .center_x(self.tile_size.one)
-        //             .center_y(self.tile_size.two)
-        //             .id(btn_data.get_id().clone())
-        //             .into();
-        //         })
-        //         .collect();
+        return self.to_element_advanced(true);
+    }
 
-        //         return Row::from_vec(buttons)
-        //         .spacing(self.spacing.one)
-        //         .into();
-        //     }
-        // )
-        // .collect();
-
+    pub fn to_element_advanced(&self, with_scrollable: bool) -> Element<'_, Message<CustomMessage>> {
         let e1 = self.locations.iter().enumerate();
 
         let mut rows: Vec<Element<'_, Message<CustomMessage>>> = Vec::with_capacity(self.locations.len());
@@ -218,7 +181,7 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
         let column = Column::from_vec(rows)
         .spacing(self.spacing.two);
 
-        return container(
+        let content: Element<'_, Message<CustomMessage>> = if with_scrollable {
             scrollable(
                 column
             )
@@ -238,8 +201,12 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                     },
                     Option::None => 800.0
                 }
-            )
-        )
+            ).into()
+        } else {
+            column.into()
+        };
+
+        return container(content)
         .padding(Padding::new(self.padding))
         .into();
     }
