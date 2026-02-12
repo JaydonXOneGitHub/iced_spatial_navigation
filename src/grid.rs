@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, button::{Status, Style}, container, scrollable}};
+use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, container::{Style}, container, scrollable}};
 use vector_x::Vector2;
 
 use crate::{TGridButton, direction::Direction, message::Message, position::Position};
@@ -13,7 +13,6 @@ pub type StyleCallback<CustomMessage, GridButton> = Box<dyn Fn(
     usize, 
     usize, 
     &Theme,
-    Status,
     &GridButton
 ) -> Style>;
 
@@ -33,6 +32,7 @@ pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub culling_callback: Option<CullingCallback<CustomMessage, GridButton>>,
     pub grid_size: Option<Vector2<f32>>,
     pub scroll_id: Id,
+    pub button_container_size: f32,
     _marker: PhantomData<CustomMessage>
 }
 
@@ -48,6 +48,7 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
             grid_size: Option::None,
             padding: 0.0,
             scroll_id: Id::unique(),
+            button_container_size: 0.0,
             _marker: PhantomData
         };
     }
@@ -66,6 +67,11 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
 
     pub fn with_padding(mut self, padding: f32) -> Self {
         self.padding = padding;
+        return self;
+    }
+
+    pub fn with_button_container_size(mut self, button_container_size: f32) -> Self {
+        self.button_container_size = button_container_size;
         return self;
     }
 
@@ -149,23 +155,27 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                                 button.inner().map(|_| Message::Nil)
                             )
                         )
-                        .width(self.tile_size.one)
-                        .height(self.tile_size.two)
-                        .style(move |t, s| -> Style {
-                            return match &self.style_callback {
-                                Option::Some(callback) => callback(
-                                    self,
-                                    c, r,
-                                    t, s, button
-                                ),
-                                Option::None => Style::default()
-                            };
-                        })
+                        .width(self.tile_size.one - (
+                            self.button_container_size * 2.0
+                        ))
+                        .height(self.tile_size.two - (
+                            self.button_container_size * 2.0
+                        ))
                         .on_press(Message::ButtonPressed(Position::new(c, r)))
                     )
                     .center_x(self.tile_size.one)
                     .center_y(self.tile_size.two)
                     .id(button.get_id().clone())
+                    .style(move |t| -> Style {
+                            return match &self.style_callback {
+                                Option::Some(callback) => callback(
+                                    self,
+                                    c, r,
+                                    t, button
+                                ),
+                                Option::None => Style::default()
+                            };
+                        })
                     .into();
 
                 buttons.push(elem);
