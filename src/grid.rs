@@ -1,10 +1,13 @@
 use std::marker::PhantomData;
 
-use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, container::{Style}, container, scrollable}};
+use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, button::Status, container, scrollable}};
 use vector_x::Vector2;
 
 use crate::{TGridButton, direction::Direction, message::Message, position::Position};
 use iced::widget::button as button_fn;
+
+use iced::widget::button::Style as ButtonStyle;
+use iced::widget::container::Style as ContainerStyle;
 
 /// Ideal structure for member names is:
 /// (grid, x, y, theme, status, grid_button)
@@ -14,7 +17,16 @@ pub type StyleCallback<CustomMessage, GridButton> = Box<dyn Fn(
     usize, 
     &Theme,
     &GridButton
-) -> Style>;
+) -> ContainerStyle>;
+
+pub type ButtonStyleCallback<CustomMessage, GridButton> = Box<dyn Fn(
+    &Grid<CustomMessage, GridButton>,
+    usize, 
+    usize, 
+    &Theme,
+    Status,
+    &GridButton
+) -> ButtonStyle>;
 
 pub type CullingCallback<CustomMessage, GridButton> = Box<dyn Fn(
     &Grid<CustomMessage, GridButton>,
@@ -28,7 +40,8 @@ pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub tile_size: Vector2<f32>,
     pub spacing: Vector2<f32>,
     pub padding: f32,
-    pub style_callback: Option<StyleCallback<CustomMessage, GridButton>>,
+    pub container_style_callback: Option<StyleCallback<CustomMessage, GridButton>>,
+    pub button_style_callback: Option<ButtonStyleCallback<CustomMessage, GridButton>>,
     pub culling_callback: Option<CullingCallback<CustomMessage, GridButton>>,
     pub grid_size: Option<Vector2<f32>>,
     pub scroll_id: Id,
@@ -43,8 +56,9 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
             position: Position::zero(),
             tile_size: Vector2::new(0.0, 0.0),
             spacing: Vector2::new(0.0, 0.0),
-            style_callback: Option::None,
+            container_style_callback: Option::None,
             culling_callback: Option::None,
+            button_style_callback: Option::None,
             grid_size: Option::None,
             padding: 0.0,
             scroll_id: Id::unique(),
@@ -95,12 +109,19 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
         return self;
     }
 
-    /// Set the button style callback
-    pub fn with_style_callback(
+    pub fn with_container_style_callback(
         mut self, 
         callback: Option<StyleCallback<CustomMessage, GridButton>>
     ) -> Self {
-        self.style_callback = callback;
+        self.container_style_callback = callback;
+        return self;
+    }
+
+    pub fn with_button_style_callback(
+        mut self, 
+        callback: Option<ButtonStyleCallback<CustomMessage, GridButton>>
+    ) -> Self {
+        self.button_style_callback = callback;
         return self;
     }
 
@@ -162,18 +183,27 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                             self.button_container_size * 2.0
                         ))
                         .on_press(Message::ButtonPressed(Position::new(c, r)))
+                        .style(move |t, s| {
+                            return match &self.button_style_callback {
+                                Option::Some(cb) => cb(
+                                    self, c, r, 
+                                    t, s, button
+                                ),
+                                Option::None => ButtonStyle::default()
+                            };
+                        })
                     )
                     .center_x(self.tile_size.one)
                     .center_y(self.tile_size.two)
                     .id(button.get_id().clone())
-                    .style(move |t| -> Style {
-                            return match &self.style_callback {
+                    .style(move |t| -> ContainerStyle {
+                            return match &self.container_style_callback {
                                 Option::Some(callback) => callback(
                                     self,
                                     c, r,
                                     t, button
                                 ),
-                                Option::None => Style::default()
+                                Option::None => ContainerStyle::default()
                             };
                         })
                     .into();
