@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{any::Any, marker::PhantomData};
 
 use iced::{Element, Padding, Task, Theme, widget::{Column, Id, Row, button::Status, container, scrollable}};
 use vector_x::Vector2;
@@ -45,8 +45,7 @@ pub struct Grid<CustomMessage, GridButton: TGridButton> {
     pub culling_callback: Option<CullingCallback<CustomMessage, GridButton>>,
     pub grid_size: Option<Vector2<f32>>,
     pub scroll_id: Id,
-    pub button_container_size: f32,
-    _marker: PhantomData<CustomMessage>
+    pub button_container_size: f32
 }
 
 impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
@@ -62,8 +61,7 @@ impl<CustomMessage, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
             grid_size: Option::None,
             padding: 0.0,
             scroll_id: Id::unique(),
-            button_container_size: 0.0,
-            _marker: PhantomData
+            button_container_size: 0.0
         };
     }
 }
@@ -152,10 +150,17 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
 impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButton> {
     /// Convert the data to the button elements
     pub fn to_element(&self) -> Element<'_, Message<CustomMessage>> {
-        return self.to_element_advanced(true);
+        return self.to_element_advanced(
+            true, 
+            Option::None
+        );
     }
 
-    pub fn to_element_advanced(&self, with_scrollable: bool) -> Element<'_, Message<CustomMessage>> {
+    pub fn to_element_advanced(
+        &self, 
+        with_scrollable: bool, 
+        external_data: Option<&dyn Any>
+    ) -> Element<'_, Message<CustomMessage>> {
         let e1 = self.locations.iter().enumerate();
 
         let mut rows: Vec<Element<'_, Message<CustomMessage>>> = Vec::with_capacity(self.locations.len());
@@ -173,7 +178,7 @@ impl<CustomMessage: Clone, GridButton: TGridButton> Grid<CustomMessage, GridButt
                 let elem: Element<'_, Message<CustomMessage>> = container(
                         button_fn(
                             container(
-                                button.inner().map(|_| Message::Nil)
+                                button.inner(external_data).map(|_| Message::Nil)
                             )
                         )
                         .width(self.tile_size.one - (
